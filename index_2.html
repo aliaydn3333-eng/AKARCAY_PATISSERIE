@@ -121,6 +121,51 @@
     overflow: hidden;
   }
 
+  /* ---------- Alt kategori navigasyonu (çok sayfalı kategoriler) ---------- */
+  .subcategory-nav { margin-bottom: 16px; }
+  .subcategory-nav__list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .subcategory-nav__list::-webkit-scrollbar { height: 4px; }
+  .subcategory-nav__button {
+    flex-shrink: 0;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-alt);
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: 36px;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .subcategory-nav__button:hover { border-color: var(--color-primary); }
+  .subcategory-nav__button[aria-current="true"] {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: #fff;
+  }
+
+  .menu-subcategory { margin-bottom: 24px; scroll-margin-top: calc(var(--nav-height) + 16px); }
+  .menu-subcategory:last-child { margin-bottom: 0; }
+  .menu-subcategory__title {
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    margin: 0 0 12px;
+  }
+
   /* ---------- Footer ---------- */
   .site-footer {
     text-align: center;
@@ -220,9 +265,23 @@
 
     <section class="menu-category" id="cat-tavuk-yemekleri" aria-labelledby="cat-tavuk-yemekleri-heading">
       <h2 class="menu-category__title" id="cat-tavuk-yemekleri-heading">Tavuk Yemekleri</h2>
-      <div class="menu-category__pages">
-        <img class="menu-category__page" src="pdf-pages/page-08.jpg" alt="Tavuk Yemekleri menü sayfası (1/2)" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-09.jpg" alt="Tavuk Yemekleri menü sayfası (2/2)" loading="lazy" decoding="async">
+      <nav class="subcategory-nav" aria-label="Tavuk Yemekleri alt kategorileri">
+        <div class="subcategory-nav__list">
+          <button type="button" class="subcategory-nav__button" data-target="cat-tavuk-yemekleri--kori-soslu-tavuk-tavuk-kulbasti" aria-current="true">Köri Soslu Tavuk – Tavuk Külbastı</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-tavuk-yemekleri--tavuk-sinitsel-meksika-soslu-pilic">Tavuk Şinitsel – Meksika Soslu Piliç</button>
+        </div>
+      </nav>
+      <div class="menu-subcategory" id="cat-tavuk-yemekleri--kori-soslu-tavuk-tavuk-kulbasti">
+        <h3 class="menu-subcategory__title">Köri Soslu Tavuk – Tavuk Külbastı</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-08.jpg" alt="Tavuk Yemekleri menü sayfası (1/2)" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-tavuk-yemekleri--tavuk-sinitsel-meksika-soslu-pilic">
+        <h3 class="menu-subcategory__title">Tavuk Şinitsel – Meksika Soslu Piliç</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-09.jpg" alt="Tavuk Yemekleri menü sayfası (2/2)" loading="lazy" decoding="async">
+        </div>
       </div>
     </section>
 
@@ -249,9 +308,23 @@
 
     <section class="menu-category" id="cat-et-yemekleri" aria-labelledby="cat-et-yemekleri-heading">
       <h2 class="menu-category__title" id="cat-et-yemekleri-heading">Et Yemekleri</h2>
-      <div class="menu-category__pages">
-        <img class="menu-category__page" src="pdf-pages/page-13.jpg" alt="Et Yemekleri menü sayfası (1/2)" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-14.jpg" alt="Et Yemekleri menü sayfası (2/2)" loading="lazy" decoding="async">
+      <nav class="subcategory-nav" aria-label="Et Yemekleri alt kategorileri">
+        <div class="subcategory-nav__list">
+          <button type="button" class="subcategory-nav__button" data-target="cat-et-yemekleri--izgara-kofte-dana-fajita" aria-current="true">Izgara Köfte – Dana Fajita</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-et-yemekleri--saslik-tava-kayseri-yaglama">Şaşlık Tava – Kayseri Yağlama</button>
+        </div>
+      </nav>
+      <div class="menu-subcategory" id="cat-et-yemekleri--izgara-kofte-dana-fajita">
+        <h3 class="menu-subcategory__title">Izgara Köfte – Dana Fajita</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-13.jpg" alt="Et Yemekleri menü sayfası (1/2)" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-et-yemekleri--saslik-tava-kayseri-yaglama">
+        <h3 class="menu-subcategory__title">Şaşlık Tava – Kayseri Yağlama</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-14.jpg" alt="Et Yemekleri menü sayfası (2/2)" loading="lazy" decoding="async">
+        </div>
       </div>
     </section>
 
@@ -271,26 +344,108 @@
 
     <section class="menu-category" id="cat-tatlilar" aria-labelledby="cat-tatlilar-heading">
       <h2 class="menu-category__title" id="cat-tatlilar-heading">Tatlılar</h2>
-      <div class="menu-category__pages">
-        <img class="menu-category__page" src="pdf-pages/page-17.jpg" alt="Tatlılar menü sayfası (1/5) — Waffle ve Tatlı" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-18.jpg" alt="Tatlılar menü sayfası (2/5) — Sütlü Tatlılar" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-19.jpg" alt="Tatlılar menü sayfası (3/5) — Cheesecake ve Adet Pastalar" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-20.jpg" alt="Tatlılar menü sayfası (4/5) — Ekler, Kurabiyeler, Tepsi Dilim Tatlılar" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-21.jpg" alt="Tatlılar menü sayfası (5/5) — Baklava Çeşitleri" loading="lazy" decoding="async">
+      <nav class="subcategory-nav" aria-label="Tatlılar alt kategorileri">
+        <div class="subcategory-nav__list">
+          <button type="button" class="subcategory-nav__button" data-target="cat-tatlilar--waffle-ve-tatli" aria-current="true">Waffle ve Tatlı</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-tatlilar--sutlu-tatlilar">Sütlü Tatlılar</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-tatlilar--cheesecake-ve-adet-pastalar">Cheesecake ve Adet Pastalar</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-tatlilar--ekler-kurabiyeler-tepsi-dilim-tatlilar">Ekler, Kurabiyeler, Tepsi Dilim Tatlılar</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-tatlilar--baklava-cesitleri">Baklava Çeşitleri</button>
+        </div>
+      </nav>
+      <div class="menu-subcategory" id="cat-tatlilar--waffle-ve-tatli">
+        <h3 class="menu-subcategory__title">Waffle ve Tatlı</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-17.jpg" alt="Tatlılar menü sayfası (1/5) — Waffle ve Tatlı" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-tatlilar--sutlu-tatlilar">
+        <h3 class="menu-subcategory__title">Sütlü Tatlılar</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-18.jpg" alt="Tatlılar menü sayfası (2/5) — Sütlü Tatlılar" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-tatlilar--cheesecake-ve-adet-pastalar">
+        <h3 class="menu-subcategory__title">Cheesecake ve Adet Pastalar</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-19.jpg" alt="Tatlılar menü sayfası (3/5) — Cheesecake ve Adet Pastalar" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-tatlilar--ekler-kurabiyeler-tepsi-dilim-tatlilar">
+        <h3 class="menu-subcategory__title">Ekler, Kurabiyeler, Tepsi Dilim Tatlılar</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-20.jpg" alt="Tatlılar menü sayfası (4/5) — Ekler, Kurabiyeler, Tepsi Dilim Tatlılar" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-tatlilar--baklava-cesitleri">
+        <h3 class="menu-subcategory__title">Baklava Çeşitleri</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-21.jpg" alt="Tatlılar menü sayfası (5/5) — Baklava Çeşitleri" loading="lazy" decoding="async">
+        </div>
       </div>
     </section>
 
     <section class="menu-category" id="cat-icecekler" aria-labelledby="cat-icecekler-heading">
       <h2 class="menu-category__title" id="cat-icecekler-heading">İçecekler</h2>
-      <div class="menu-category__pages">
-        <img class="menu-category__page" src="pdf-pages/page-22.jpg" alt="İçecekler menü sayfası (1/8) — Çaylar" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-23.jpg" alt="İçecekler menü sayfası (2/8) — Matcha Bar" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-24.jpg" alt="İçecekler menü sayfası (3/8) — Coffee Bar" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-25.jpg" alt="İçecekler menü sayfası (4/8) — Ice Coffee Bar" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-26.jpg" alt="İçecekler menü sayfası (5/8) — Türk Kahveleri" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-27.jpg" alt="İçecekler menü sayfası (6/8) — Mikshake ve Smoothie" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-28.jpg" alt="İçecekler menü sayfası (7/8) — Frappe, Cool Drop Bar, Bubble Tea" loading="lazy" decoding="async">
-        <img class="menu-category__page" src="pdf-pages/page-29.jpg" alt="İçecekler menü sayfası (8/8) — Vitamin Bar ve Soğuk İçecekler" loading="lazy" decoding="async">
+      <nav class="subcategory-nav" aria-label="İçecekler alt kategorileri">
+        <div class="subcategory-nav__list">
+          <button type="button" class="subcategory-nav__button" data-target="cat-icecekler--caylar" aria-current="true">Çaylar</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-icecekler--matcha-bar">Matcha Bar</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-icecekler--coffee-bar">Coffee Bar</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-icecekler--ice-coffee-bar">Ice Coffee Bar</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-icecekler--turk-kahveleri">Türk Kahveleri</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-icecekler--mikshake-ve-smoothie">Mikshake ve Smoothie</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-icecekler--frappe-cool-drop-bar-bubble-tea">Frappe, Cool Drop Bar, Bubble Tea</button>
+          <button type="button" class="subcategory-nav__button" data-target="cat-icecekler--vitamin-bar-ve-soguk-icecekler">Vitamin Bar ve Soğuk İçecekler</button>
+        </div>
+      </nav>
+      <div class="menu-subcategory" id="cat-icecekler--caylar">
+        <h3 class="menu-subcategory__title">Çaylar</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-22.jpg" alt="İçecekler menü sayfası (1/8) — Çaylar" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-icecekler--matcha-bar">
+        <h3 class="menu-subcategory__title">Matcha Bar</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-23.jpg" alt="İçecekler menü sayfası (2/8) — Matcha Bar" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-icecekler--coffee-bar">
+        <h3 class="menu-subcategory__title">Coffee Bar</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-24.jpg" alt="İçecekler menü sayfası (3/8) — Coffee Bar" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-icecekler--ice-coffee-bar">
+        <h3 class="menu-subcategory__title">Ice Coffee Bar</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-25.jpg" alt="İçecekler menü sayfası (4/8) — Ice Coffee Bar" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-icecekler--turk-kahveleri">
+        <h3 class="menu-subcategory__title">Türk Kahveleri</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-26.jpg" alt="İçecekler menü sayfası (5/8) — Türk Kahveleri" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-icecekler--mikshake-ve-smoothie">
+        <h3 class="menu-subcategory__title">Mikshake ve Smoothie</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-27.jpg" alt="İçecekler menü sayfası (6/8) — Mikshake ve Smoothie" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-icecekler--frappe-cool-drop-bar-bubble-tea">
+        <h3 class="menu-subcategory__title">Frappe, Cool Drop Bar, Bubble Tea</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-28.jpg" alt="İçecekler menü sayfası (7/8) — Frappe, Cool Drop Bar, Bubble Tea" loading="lazy" decoding="async">
+        </div>
+      </div>
+      <div class="menu-subcategory" id="cat-icecekler--vitamin-bar-ve-soguk-icecekler">
+        <h3 class="menu-subcategory__title">Vitamin Bar ve Soğuk İçecekler</h3>
+        <div class="menu-category__pages">
+          <img class="menu-category__page" src="pdf-pages/page-29.jpg" alt="İçecekler menü sayfası (8/8) — Vitamin Bar ve Soğuk İçecekler" loading="lazy" decoding="async">
+        </div>
       </div>
     </section>
   </main>
@@ -332,6 +487,42 @@
   }, { rootMargin: '-96px 0px -70% 0px', threshold: 0 });
 
   document.querySelectorAll('.menu-category').forEach(function (section) { observer.observe(section); });
+
+  /* ==========================================================
+     ALT KATEGORİ NAV: TIKLAMA İLE SMOOTH SCROLL
+     ========================================================== */
+  document.addEventListener('click', function (event) {
+    const button = event.target.closest('.subcategory-nav__button');
+    if (!button) return;
+    const target = document.getElementById(button.dataset.target);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  function setActiveSubButton(subSlug) {
+    const mainSlug = subSlug.split('--')[0];
+    const section = document.getElementById(mainSlug);
+    if (!section) return;
+    section.querySelectorAll('.subcategory-nav__button').forEach(function (button) {
+      if (button.dataset.target === subSlug) {
+        button.setAttribute('aria-current', 'true');
+        button.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      } else {
+        button.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  let lastActiveSubSlug = null;
+  const subObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting && entry.target.id !== lastActiveSubSlug) {
+        lastActiveSubSlug = entry.target.id;
+        setActiveSubButton(lastActiveSubSlug);
+      }
+    });
+  }, { rootMargin: '-96px 0px -70% 0px', threshold: 0 });
+
+  document.querySelectorAll('.menu-subcategory').forEach(function (subSection) { subObserver.observe(subSection); });
 </script>
 </body>
 </html>
