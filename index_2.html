@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akarçay Patisserie | Dijital QR Menü</title>
+<meta name="description" content="Akarçay Patisserie dijital menüsü — orijinal menü tasarımı, kategoriye göre hızlı geçiş ile.">
+<style>
+  :root {
+    --color-bg: #F7EFE3;
+    --color-surface-alt: #FBF3E6;
+    --color-primary: #963A26;
+    --color-primary-dark: #722A1B;
+    --color-text: #2A2018;
+    --color-text-muted: #6B5B4C;
+    --color-border: #E9DEC9;
+    --color-focus: #963A26;
+    --font-serif: Georgia, 'Times New Roman', ui-serif, serif;
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --nav-height: 56px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  ul { list-style: none; margin: 0; padding: 0; }
+
+  /* ---------- Header / Hero ---------- */
+  .site-header {
+    background: var(--color-surface-alt);
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .site-header__cover {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    display: block;
+  }
+  .site-header__note {
+    margin: 0;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+
+  /* ---------- Sticky kategori menüsü ---------- */
+  .category-nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--color-surface-alt);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .category-nav__list {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+  .category-nav__list::-webkit-scrollbar { height: 4px; }
+  .category-nav__button {
+    flex-shrink: 0;
+    border: 1px solid var(--color-border);
+    background: #FFFCF6;
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 10px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: 44px;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .category-nav__button:hover { border-color: var(--color-primary); }
+  .category-nav__button[aria-current="true"] {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+
+  /* ---------- Menü içeriği: PDF sayfa görselleri ---------- */
+  main {
+    max-width: 640px;
+    margin-inline: auto;
+    padding: 24px 16px 48px;
+  }
+  .menu-category {
+    margin-bottom: 40px;
+    scroll-margin-top: calc(var(--nav-height) + 16px);
+  }
+  .menu-category__title {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    color: var(--color-primary-dark);
+    margin: 0 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--color-border);
+  }
+  .menu-category__pages {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .menu-category__page {
+    border-radius: 14px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 1px 2px rgba(42, 32, 24, 0.06);
+    overflow: hidden;
+  }
+
+  /* ---------- Footer ---------- */
+  .site-footer {
+    text-align: center;
+    padding: 24px 16px;
+    border-top: 1px solid var(--color-border);
+  }
+  .site-footer__cover {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 12px;
+    border-radius: 14px;
+    display: block;
+  }
+  .site-footer p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+  }
+
+  :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="site-header">
+    <img class="site-header__cover" src="pdf-pages/page-01.jpg" alt="Akarçay Patisserie menü kapağı" width="420" height="594" loading="eager" decoding="async">
+    <p class="site-header__note">Orijinal menü sayfaları — kategoriye dokunarak ilgili bölüme geçebilirsiniz.</p>
+  </header>
+
+  <nav class="category-nav" aria-label="Kategoriler">
+    <ul class="category-nav__list" id="category-nav-list">
+      <li><button type="button" class="category-nav__button" data-target="cat-gune-baslarken" aria-current="true">Güne Başlarken</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-tostlar">Tostlar</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-gozlemeler">Gözlemeler</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-aperatifler">Aperatifler</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-pizzalar">Pizzalar</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-makarnalar">Makarnalar</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-tavuk-yemekleri">Tavuk Yemekleri</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-soguk-sandvicler">Soğuk Sandviçler</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-hamburgerler">Hamburgerler</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-omlet-cesitleri">Omlet Çeşitleri</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-et-yemekleri">Et Yemekleri</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-krepler">Krepler</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-salatalar">Salatalar</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-tatlilar">Tatlılar</button></li>
+      <li><button type="button" class="category-nav__button" data-target="cat-icecekler">İçecekler</button></li>
+    </ul>
+  </nav>
+
+  <main id="menu-main">
+    <section class="menu-category" id="cat-gune-baslarken" aria-labelledby="cat-gune-baslarken-heading">
+      <h2 class="menu-category__title" id="cat-gune-baslarken-heading">Güne Başlarken</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-02.jpg" alt="Güne Başlarken menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-tostlar" aria-labelledby="cat-tostlar-heading">
+      <h2 class="menu-category__title" id="cat-tostlar-heading">Tostlar</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-03.jpg" alt="Tostlar menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-gozlemeler" aria-labelledby="cat-gozlemeler-heading">
+      <h2 class="menu-category__title" id="cat-gozlemeler-heading">Gözlemeler</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-04.jpg" alt="Gözlemeler menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-aperatifler" aria-labelledby="cat-aperatifler-heading">
+      <h2 class="menu-category__title" id="cat-aperatifler-heading">Aperatifler</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-05.jpg" alt="Aperatifler menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-pizzalar" aria-labelledby="cat-pizzalar-heading">
+      <h2 class="menu-category__title" id="cat-pizzalar-heading">Pizzalar</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-06.jpg" alt="Pizzalar menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-makarnalar" aria-labelledby="cat-makarnalar-heading">
+      <h2 class="menu-category__title" id="cat-makarnalar-heading">Makarnalar</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-07.jpg" alt="Makarnalar menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-tavuk-yemekleri" aria-labelledby="cat-tavuk-yemekleri-heading">
+      <h2 class="menu-category__title" id="cat-tavuk-yemekleri-heading">Tavuk Yemekleri</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-08.jpg" alt="Tavuk Yemekleri menü sayfası (1/2)" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-09.jpg" alt="Tavuk Yemekleri menü sayfası (2/2)" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-soguk-sandvicler" aria-labelledby="cat-soguk-sandvicler-heading">
+      <h2 class="menu-category__title" id="cat-soguk-sandvicler-heading">Soğuk Sandviçler</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-10.jpg" alt="Soğuk Sandviçler menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-hamburgerler" aria-labelledby="cat-hamburgerler-heading">
+      <h2 class="menu-category__title" id="cat-hamburgerler-heading">Hamburgerler</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-11.jpg" alt="Hamburgerler menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-omlet-cesitleri" aria-labelledby="cat-omlet-cesitleri-heading">
+      <h2 class="menu-category__title" id="cat-omlet-cesitleri-heading">Omlet Çeşitleri</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-12.jpg" alt="Omlet Çeşitleri menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-et-yemekleri" aria-labelledby="cat-et-yemekleri-heading">
+      <h2 class="menu-category__title" id="cat-et-yemekleri-heading">Et Yemekleri</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-13.jpg" alt="Et Yemekleri menü sayfası (1/2)" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-14.jpg" alt="Et Yemekleri menü sayfası (2/2)" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-krepler" aria-labelledby="cat-krepler-heading">
+      <h2 class="menu-category__title" id="cat-krepler-heading">Krepler</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-15.jpg" alt="Krepler menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-salatalar" aria-labelledby="cat-salatalar-heading">
+      <h2 class="menu-category__title" id="cat-salatalar-heading">Salatalar</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-16.jpg" alt="Salatalar menü sayfası" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-tatlilar" aria-labelledby="cat-tatlilar-heading">
+      <h2 class="menu-category__title" id="cat-tatlilar-heading">Tatlılar</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-17.jpg" alt="Tatlılar menü sayfası (1/5) — Waffle ve Tatlı" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-18.jpg" alt="Tatlılar menü sayfası (2/5) — Sütlü Tatlılar" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-19.jpg" alt="Tatlılar menü sayfası (3/5) — Cheesecake ve Adet Pastalar" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-20.jpg" alt="Tatlılar menü sayfası (4/5) — Ekler, Kurabiyeler, Tepsi Dilim Tatlılar" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-21.jpg" alt="Tatlılar menü sayfası (5/5) — Baklava Çeşitleri" loading="lazy" decoding="async">
+      </div>
+    </section>
+
+    <section class="menu-category" id="cat-icecekler" aria-labelledby="cat-icecekler-heading">
+      <h2 class="menu-category__title" id="cat-icecekler-heading">İçecekler</h2>
+      <div class="menu-category__pages">
+        <img class="menu-category__page" src="pdf-pages/page-22.jpg" alt="İçecekler menü sayfası (1/8) — Çaylar" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-23.jpg" alt="İçecekler menü sayfası (2/8) — Matcha Bar" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-24.jpg" alt="İçecekler menü sayfası (3/8) — Coffee Bar" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-25.jpg" alt="İçecekler menü sayfası (4/8) — Ice Coffee Bar" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-26.jpg" alt="İçecekler menü sayfası (5/8) — Türk Kahveleri" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-27.jpg" alt="İçecekler menü sayfası (6/8) — Mikshake ve Smoothie" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-28.jpg" alt="İçecekler menü sayfası (7/8) — Frappe, Cool Drop Bar, Bubble Tea" loading="lazy" decoding="async">
+        <img class="menu-category__page" src="pdf-pages/page-29.jpg" alt="İçecekler menü sayfası (8/8) — Vitamin Bar ve Soğuk İçecekler" loading="lazy" decoding="async">
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <img class="site-footer__cover" src="pdf-pages/page-30.jpg" alt="Akarçay Patisserie Instagram: akarcay.patisserie.bistro" loading="lazy" decoding="async">
+    <p>Bu dijital menü GitHub Pages üzerinde yayınlanır ve QR kod canlı site bağlantısına yönlendirilir.</p>
+  </footer>
+
+<script>
+  const navList = document.getElementById('category-nav-list');
+
+  navList.addEventListener('click', function (event) {
+    const button = event.target.closest('.category-nav__button');
+    if (!button) return;
+    const target = document.getElementById(button.dataset.target);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  function setActiveButton(slug) {
+    navList.querySelectorAll('.category-nav__button').forEach(function (button) {
+      if (button.dataset.target === slug) {
+        button.setAttribute('aria-current', 'true');
+        button.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      } else {
+        button.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  let lastActiveSlug = null;
+  const observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting && entry.target.id !== lastActiveSlug) {
+        lastActiveSlug = entry.target.id;
+        setActiveButton(lastActiveSlug);
+      }
+    });
+  }, { rootMargin: '-96px 0px -70% 0px', threshold: 0 });
+
+  document.querySelectorAll('.menu-category').forEach(function (section) { observer.observe(section); });
+</script>
+</body>
+</html>
