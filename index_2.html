@@ -469,7 +469,7 @@
     navList.querySelectorAll('.category-nav__button').forEach(function (button) {
       if (button.dataset.target === slug) {
         button.setAttribute('aria-current', 'true');
-        button.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        button.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
       } else {
         button.removeAttribute('aria-current');
       }
@@ -505,7 +505,7 @@
     section.querySelectorAll('.subcategory-nav__button').forEach(function (button) {
       if (button.dataset.target === subSlug) {
         button.setAttribute('aria-current', 'true');
-        button.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        button.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
       } else {
         button.removeAttribute('aria-current');
       }
