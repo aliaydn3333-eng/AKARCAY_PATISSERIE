@@ -17,7 +17,7 @@
     --color-focus: #963A26;
     --font-serif: Georgia, 'Times New Roman', ui-serif, serif;
     --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    --nav-height: 56px;
+    --sticky-offset: 64px;
   }
 
   * { box-sizing: border-box; }
@@ -67,6 +67,8 @@
     overflow-x: auto;
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
   }
   .category-nav__list::-webkit-scrollbar { height: 4px; }
   .category-nav__button {
@@ -99,7 +101,7 @@
   }
   .menu-category {
     margin-bottom: 40px;
-    scroll-margin-top: calc(var(--nav-height) + 16px);
+    scroll-margin-top: calc(var(--sticky-offset) + 16px);
   }
   .menu-category__title {
     font-family: var(--font-serif);
@@ -119,6 +121,9 @@
     border: 1px solid var(--color-border);
     box-shadow: 0 1px 2px rgba(42, 32, 24, 0.06);
     overflow: hidden;
+    aspect-ratio: 1310 / 1853;
+    width: 100%;
+    height: auto;
   }
 
   /* ---------- Alt kategori navigasyonu (çok sayfalı kategoriler) ---------- */
@@ -129,6 +134,8 @@
     overflow-x: auto;
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
     padding-bottom: 2px;
   }
   .subcategory-nav__list::-webkit-scrollbar { height: 4px; }
@@ -154,7 +161,7 @@
     color: #fff;
   }
 
-  .menu-subcategory { margin-bottom: 24px; scroll-margin-top: calc(var(--nav-height) + 16px); }
+  .menu-subcategory { margin-bottom: 24px; scroll-margin-top: calc(var(--sticky-offset) + 16px); }
   .menu-subcategory:last-child { margin-bottom: 0; }
   .menu-subcategory__title {
     font-family: var(--font-sans);
@@ -175,6 +182,7 @@
   .site-footer__cover {
     width: 100%;
     max-width: 320px;
+    aspect-ratio: 1310 / 1853;
     margin: 0 auto 12px;
     border-radius: 14px;
     display: block;
@@ -457,46 +465,85 @@
 
 <script>
   const navList = document.getElementById('category-nav-list');
+  const categoryNavEl = document.querySelector('.category-nav');
+  let stickyOffset = 64;
+  let isProgrammaticScroll = false;
 
+  function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function waitForScrollEnd(callback) {
+    let done = false;
+    let fallbackTimer;
+    function finish() {
+      if (done) return;
+      done = true;
+      window.removeEventListener('scrollend', finish);
+      clearTimeout(fallbackTimer);
+      callback();
+    }
+    if ('onscrollend' in window) window.addEventListener('scrollend', finish, { once: true });
+    // Generous safety net only — real completion is signalled by 'scrollend'.
+    // Long pages can take well over a second to finish a smooth scroll,
+    // so this must never race the event on a normal-distance scroll.
+    fallbackTimer = setTimeout(finish, 4000);
+  }
+
+  function goToTarget(el, setActive) {
+    if (!el) return;
+    const top = Math.max(el.getBoundingClientRect().top + window.pageYOffset - stickyOffset - 16, 0);
+    setActive(el.id);
+    if (Math.abs(top - window.pageYOffset) < 2) return; // already there — nothing to animate, no lock needed
+    isProgrammaticScroll = true;
+    window.scrollTo({ top: top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    waitForScrollEnd(function () { isProgrammaticScroll = false; });
+  }
+
+  /* ==========================================================
+     ANA KATEGORİ NAV: TIKLAMA İLE SCROLL
+     ========================================================== */
   navList.addEventListener('click', function (event) {
     const button = event.target.closest('.category-nav__button');
     if (!button) return;
     const target = document.getElementById(button.dataset.target);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!target) return;
+    goToTarget(target, setActiveButton);
   });
 
-  function setActiveButton(slug) {
-    navList.querySelectorAll('.category-nav__button').forEach(function (button) {
-      if (button.dataset.target === slug) {
-        button.setAttribute('aria-current', 'true');
-        button.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
-      } else {
-        button.removeAttribute('aria-current');
-      }
-    });
-  }
-
-  let lastActiveSlug = null;
-  const observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting && entry.target.id !== lastActiveSlug) {
-        lastActiveSlug = entry.target.id;
-        setActiveButton(lastActiveSlug);
-      }
-    });
-  }, { rootMargin: '-96px 0px -70% 0px', threshold: 0 });
-
-  document.querySelectorAll('.menu-category').forEach(function (section) { observer.observe(section); });
-
   /* ==========================================================
-     ALT KATEGORİ NAV: TIKLAMA İLE SMOOTH SCROLL
+     ALT KATEGORİ NAV: TIKLAMA İLE SCROLL
      ========================================================== */
   document.addEventListener('click', function (event) {
     const button = event.target.closest('.subcategory-nav__button');
     if (!button) return;
     const target = document.getElementById(button.dataset.target);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!target) return;
+    goToTarget(target, setActiveSubButton);
   });
+
+  /* ==========================================================
+     SCROLL-SPY: ANA + ALT KATEGORİ
+     ========================================================== */
+  // Manuel yatay ortalama: scrollIntoView({block:'nearest'}) burada güvenli değil —
+  // pill'in dikey ekseni için ara bir scroll konteyneri olmadığından, tarayıcı bunu
+  // sayfanın kendisini kaydırarak "çözebilir" ve az önce yapılan dikey scrollu geri alabilir.
+  function centerInStrip(button) {
+    const strip = button.parentElement;
+    const targetLeft = button.offsetLeft - (strip.clientWidth - button.clientWidth) / 2;
+    strip.scrollLeft = Math.max(0, targetLeft);
+  }
+
+  function setActiveButton(slug) {
+    navList.querySelectorAll('.category-nav__button').forEach(function (button) {
+      if (button.dataset.target === slug) {
+        button.setAttribute('aria-current', 'true');
+        centerInStrip(button);
+      } else {
+        button.removeAttribute('aria-current');
+      }
+    });
+  }
 
   function setActiveSubButton(subSlug) {
     const mainSlug = subSlug.split('--')[0];
@@ -505,24 +552,102 @@
     section.querySelectorAll('.subcategory-nav__button').forEach(function (button) {
       if (button.dataset.target === subSlug) {
         button.setAttribute('aria-current', 'true');
-        button.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+        centerInStrip(button);
       } else {
         button.removeAttribute('aria-current');
       }
     });
   }
 
+  function topmostVisible(activeSet, orderedEls) {
+    for (let i = 0; i < orderedEls.length; i++) {
+      if (activeSet.has(orderedEls[i])) return orderedEls[i];
+    }
+    return null;
+  }
+
+  let lastActiveSlug = null;
   let lastActiveSubSlug = null;
-  const subObserver = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting && entry.target.id !== lastActiveSubSlug) {
-        lastActiveSubSlug = entry.target.id;
+  let mainObserver = null;
+  let subObserver = null;
+  const activeMainSet = new Set();
+  const activeSubSet = new Set();
+
+  function rebuildSectionObservers() {
+    if (mainObserver) mainObserver.disconnect();
+    if (subObserver) subObserver.disconnect();
+    activeMainSet.clear();
+    activeSubSet.clear();
+
+    const mainSections = Array.prototype.slice.call(document.querySelectorAll('.menu-category'));
+    const subSections = Array.prototype.slice.call(document.querySelectorAll('.menu-subcategory'));
+    const rootMargin = '-' + (stickyOffset + 8) + 'px 0px -55% 0px';
+
+    mainObserver = new IntersectionObserver(function (entries) {
+      if (isProgrammaticScroll) return;
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) activeMainSet.add(entry.target);
+        else activeMainSet.delete(entry.target);
+      });
+      const top = topmostVisible(activeMainSet, mainSections);
+      if (top && top.id !== lastActiveSlug) {
+        lastActiveSlug = top.id;
+        setActiveButton(lastActiveSlug);
+      }
+    }, { rootMargin: rootMargin, threshold: 0 });
+
+    subObserver = new IntersectionObserver(function (entries) {
+      if (isProgrammaticScroll) return;
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) activeSubSet.add(entry.target);
+        else activeSubSet.delete(entry.target);
+      });
+      const top = topmostVisible(activeSubSet, subSections);
+      if (top && top.id !== lastActiveSubSlug) {
+        lastActiveSubSlug = top.id;
         setActiveSubButton(lastActiveSubSlug);
       }
-    });
-  }, { rootMargin: '-96px 0px -70% 0px', threshold: 0 });
+    }, { rootMargin: rootMargin, threshold: 0 });
 
-  document.querySelectorAll('.menu-subcategory').forEach(function (subSection) { subObserver.observe(subSection); });
+    mainSections.forEach(function (section) { mainObserver.observe(section); });
+    subSections.forEach(function (subSection) { subObserver.observe(subSection); });
+  }
+
+  function applyStickyOffset() {
+    stickyOffset = Math.ceil(categoryNavEl.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--sticky-offset', stickyOffset + 'px');
+    rebuildSectionObservers();
+  }
+
+  /* ==========================================================
+     BAŞLANGIÇTA AKTİF KATEGORİYİ SENKRONİZE ET
+     (kapak görseli sticky menüden uzun olduğunda ilk section
+     dar IntersectionObserver bandına hiç girmeyebilir)
+     ========================================================== */
+  function refreshActiveHighlight() {
+    const mainSections = Array.prototype.slice.call(document.querySelectorAll('.menu-category'));
+    const current = mainSections.find(function (section) { return section.getBoundingClientRect().bottom > stickyOffset + 1; }) || mainSections[0];
+    if (!current) return;
+    lastActiveSlug = current.id;
+    setActiveButton(lastActiveSlug);
+    const subSections = Array.prototype.slice.call(current.querySelectorAll('.menu-subcategory'));
+    const currentSub = subSections.find(function (sub) { return sub.getBoundingClientRect().bottom > stickyOffset + 1; }) || subSections[0];
+    if (currentSub) {
+      lastActiveSubSlug = currentSub.id;
+      setActiveSubButton(lastActiveSubSlug);
+    }
+  }
+
+  /* ==========================================================
+     BAŞLAT
+     ========================================================== */
+  applyStickyOffset();
+  refreshActiveHighlight();
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(applyStickyOffset).observe(categoryNavEl);
+  } else {
+    window.addEventListener('resize', applyStickyOffset, { passive: true });
+  }
 </script>
 </body>
 </html>

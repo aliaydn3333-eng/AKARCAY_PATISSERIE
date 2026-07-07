@@ -21,7 +21,7 @@
     --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
     --space-5: 20px; --space-6: 24px; --space-7: 32px; --space-8: 40px;
     --radius: 14px;
-    --nav-height: 56px;
+    --sticky-offset: 64px;
   }
 
   * { box-sizing: border-box; }
@@ -119,6 +119,8 @@
     overflow-x: auto;
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
   }
   .category-nav__list::-webkit-scrollbar { height: 4px; }
   .category-nav__button {
@@ -151,7 +153,7 @@
   }
   .menu-category {
     margin-bottom: var(--space-8);
-    scroll-margin-top: calc(var(--nav-height) + var(--space-4));
+    scroll-margin-top: calc(var(--sticky-offset) + var(--space-4));
   }
   .menu-category__title {
     font-family: var(--font-serif);
@@ -181,10 +183,13 @@
     display: flex;
     flex-direction: column;
   }
-  .product-card:hover, .product-card:active {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(42, 32, 24, 0.12);
+  @media (hover: hover) and (pointer: fine) {
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(42, 32, 24, 0.12);
+    }
   }
+  .product-card:active { transform: translateY(-1px); }
   .product-card__media {
     aspect-ratio: 4 / 3;
     background: var(--color-border);
@@ -253,6 +258,8 @@
     overflow-x: auto;
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
     padding-bottom: 2px;
   }
   .subcategory-nav__list::-webkit-scrollbar { height: 4px; }
@@ -278,7 +285,7 @@
     color: #fff;
   }
 
-  .menu-subcategory { margin-bottom: 24px; scroll-margin-top: calc(var(--nav-height) + 16px); }
+  .menu-subcategory { margin-bottom: 24px; scroll-margin-top: calc(var(--sticky-offset) + 16px); }
   .menu-subcategory:last-child { margin-bottom: 0; }
   .menu-subcategory__title {
     font-family: var(--font-sans);
@@ -663,8 +670,9 @@
 
   function slugify(text) {
     return text
+      .replace(/İ/g, 'i').replace(/I/g, 'i').replace(/ı/g, 'i')
       .toLowerCase()
-      .replace(/ı/g, 'i').replace(/İ/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u')
+      .replace(/ğ/g, 'g').replace(/ü/g, 'u')
       .replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ç/g, 'c')
       .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   }
@@ -676,6 +684,7 @@
   const searchClear = document.getElementById('search-clear');
 
   let isSearching = false;
+  let isProgrammaticScroll = false;
 
   function createSubNavButton(mainSlug, subCategory, isFirst) {
     const btn = document.createElement('button');
@@ -843,6 +852,8 @@
     });
 
     emptyState.hidden = totalVisible !== 0;
+
+    if (!isSearching) refreshActiveHighlight();
   }
 
   searchInput.addEventListener('input', handleSearchInput);
@@ -857,53 +868,87 @@
   });
 
   /* ==========================================================
-     ANA KATEGORİ NAV: TIKLAMA İLE SMOOTH SCROLL
+     STICKY OFFSET: kategori menüsü gerçek yüksekliğini ölç
+     ========================================================== */
+  const categoryNavEl = document.querySelector('.category-nav');
+  let stickyOffset = 64;
+
+  function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function waitForScrollEnd(callback) {
+    let done = false;
+    let fallbackTimer;
+    function finish() {
+      if (done) return;
+      done = true;
+      window.removeEventListener('scrollend', finish);
+      clearTimeout(fallbackTimer);
+      callback();
+    }
+    if ('onscrollend' in window) window.addEventListener('scrollend', finish, { once: true });
+    // Generous safety net only — real completion is signalled by 'scrollend'.
+    // Long pages can take well over a second to finish a smooth scroll,
+    // so this must never race the event on a normal-distance scroll.
+    fallbackTimer = setTimeout(finish, 4000);
+  }
+
+  function goToTarget(el, setActive) {
+    if (!el) return;
+    const top = Math.max(el.getBoundingClientRect().top + window.pageYOffset - stickyOffset - 16, 0);
+    setActive(el.id);
+    if (Math.abs(top - window.pageYOffset) < 2) return; // already there — nothing to animate, no lock needed
+    isProgrammaticScroll = true;
+    window.scrollTo({ top: top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    waitForScrollEnd(function () { isProgrammaticScroll = false; });
+  }
+
+  /* ==========================================================
+     ANA KATEGORİ NAV: TIKLAMA İLE SCROLL
      ========================================================== */
   navList.addEventListener('click', function (event) {
     const button = event.target.closest('.category-nav__button');
     if (!button) return;
     const target = document.getElementById(button.dataset.target);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!target) return;
+    goToTarget(target, setActiveButton);
   });
 
   /* ==========================================================
-     ALT KATEGORİ NAV: TIKLAMA İLE SMOOTH SCROLL
+     ALT KATEGORİ NAV: TIKLAMA İLE SCROLL
      ========================================================== */
   document.addEventListener('click', function (event) {
     const button = event.target.closest('.subcategory-nav__button');
     if (!button) return;
     const target = document.getElementById(button.dataset.target);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!target) return;
+    goToTarget(target, setActiveSubButton);
   });
 
   /* ==========================================================
-     SCROLL-SPY: ANA KATEGORİ
+     SCROLL-SPY: ANA + ALT KATEGORİ
      ========================================================== */
+  // Manuel yatay ortalama: scrollIntoView({block:'nearest'}) burada güvenli değil —
+  // pill'in dikey ekseni için ara bir scroll konteyneri olmadığından, tarayıcı bunu
+  // sayfanın kendisini kaydırarak "çözebilir" ve az önce yapılan dikey scrollu geri alabilir.
+  function centerInStrip(button) {
+    const strip = button.parentElement;
+    const targetLeft = button.offsetLeft - (strip.clientWidth - button.clientWidth) / 2;
+    strip.scrollLeft = Math.max(0, targetLeft);
+  }
+
   function setActiveButton(slug) {
     navList.querySelectorAll('.category-nav__button').forEach(function (button) {
       if (button.dataset.target === slug) {
         button.setAttribute('aria-current', 'true');
-        button.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+        centerInStrip(button);
       } else {
         button.removeAttribute('aria-current');
       }
     });
   }
 
-  let lastActiveSlug = null;
-  const observer = new IntersectionObserver(function (entries) {
-    if (isSearching) return;
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting && entry.target.id !== lastActiveSlug) {
-        lastActiveSlug = entry.target.id;
-        setActiveButton(lastActiveSlug);
-      }
-    });
-  }, { rootMargin: '-96px 0px -70% 0px', threshold: 0 });
-
-  /* ==========================================================
-     SCROLL-SPY: ALT KATEGORİ
-     ========================================================== */
   function setActiveSubButton(subSlug) {
     const mainSlug = subSlug.split('--')[0];
     const section = document.getElementById(mainSlug);
@@ -911,30 +956,101 @@
     section.querySelectorAll('.subcategory-nav__button').forEach(function (button) {
       if (button.dataset.target === subSlug) {
         button.setAttribute('aria-current', 'true');
-        button.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+        centerInStrip(button);
       } else {
         button.removeAttribute('aria-current');
       }
     });
   }
 
+  function topmostVisible(activeSet, orderedEls) {
+    for (let i = 0; i < orderedEls.length; i++) {
+      if (activeSet.has(orderedEls[i])) return orderedEls[i];
+    }
+    return null;
+  }
+
+  let lastActiveSlug = null;
   let lastActiveSubSlug = null;
-  const subObserver = new IntersectionObserver(function (entries) {
-    if (isSearching) return;
-    entries.forEach(function (entry) {
-      if (entry.isIntersecting && entry.target.id !== lastActiveSubSlug) {
-        lastActiveSubSlug = entry.target.id;
+  let mainObserver = null;
+  let subObserver = null;
+  const activeMainSet = new Set();
+  const activeSubSet = new Set();
+
+  function rebuildSectionObservers() {
+    if (mainObserver) mainObserver.disconnect();
+    if (subObserver) subObserver.disconnect();
+    activeMainSet.clear();
+    activeSubSet.clear();
+
+    const mainSections = Array.prototype.slice.call(document.querySelectorAll('.menu-category'));
+    const subSections = Array.prototype.slice.call(document.querySelectorAll('.menu-subcategory'));
+    const rootMargin = '-' + (stickyOffset + 8) + 'px 0px -55% 0px';
+
+    mainObserver = new IntersectionObserver(function (entries) {
+      if (isSearching || isProgrammaticScroll) return;
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) activeMainSet.add(entry.target);
+        else activeMainSet.delete(entry.target);
+      });
+      const top = topmostVisible(activeMainSet, mainSections);
+      if (top && top.id !== lastActiveSlug) {
+        lastActiveSlug = top.id;
+        setActiveButton(lastActiveSlug);
+      }
+    }, { rootMargin: rootMargin, threshold: 0 });
+
+    subObserver = new IntersectionObserver(function (entries) {
+      if (isSearching || isProgrammaticScroll) return;
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) activeSubSet.add(entry.target);
+        else activeSubSet.delete(entry.target);
+      });
+      const top = topmostVisible(activeSubSet, subSections);
+      if (top && top.id !== lastActiveSubSlug) {
+        lastActiveSubSlug = top.id;
         setActiveSubButton(lastActiveSubSlug);
       }
-    });
-  }, { rootMargin: '-96px 0px -70% 0px', threshold: 0 });
+    }, { rootMargin: rootMargin, threshold: 0 });
+
+    mainSections.forEach(function (section) { mainObserver.observe(section); });
+    subSections.forEach(function (subSection) { subObserver.observe(subSection); });
+  }
+
+  function applyStickyOffset() {
+    stickyOffset = Math.ceil(categoryNavEl.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--sticky-offset', stickyOffset + 'px');
+    rebuildSectionObservers();
+  }
+
+  /* ==========================================================
+     ARAMA SONRASI: aktif kategori/alt kategoriyi anında düzelt
+     ========================================================== */
+  function refreshActiveHighlight() {
+    const visibleMain = Array.prototype.slice.call(document.querySelectorAll('.menu-category:not([hidden])'));
+    const current = visibleMain.find(function (section) { return section.getBoundingClientRect().bottom > stickyOffset + 1; }) || visibleMain[0];
+    if (!current) return;
+    lastActiveSlug = current.id;
+    setActiveButton(lastActiveSlug);
+    const visibleSub = Array.prototype.slice.call(current.querySelectorAll('.menu-subcategory:not([hidden])'));
+    const currentSub = visibleSub.find(function (sub) { return sub.getBoundingClientRect().bottom > stickyOffset + 1; }) || visibleSub[0];
+    if (currentSub) {
+      lastActiveSubSlug = currentSub.id;
+      setActiveSubButton(lastActiveSubSlug);
+    }
+  }
 
   /* ==========================================================
      BAŞLAT
      ========================================================== */
   render();
-  document.querySelectorAll('.menu-category').forEach(function (section) { observer.observe(section); });
-  document.querySelectorAll('.menu-subcategory').forEach(function (subSection) { subObserver.observe(subSection); });
+  applyStickyOffset();
+  refreshActiveHighlight();
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(applyStickyOffset).observe(categoryNavEl);
+  } else {
+    window.addEventListener('resize', applyStickyOffset, { passive: true });
+  }
 </script>
 </body>
 </html>
